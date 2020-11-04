@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_template/global_template.dart';
 
 import 'src/functions/functions.dart';
+import 'src/network/models/person/person_model.dart';
 import 'src/providers/providers.dart';
-import 'src/network/models/person/person.dart';
+
+//TODO Simpan generate result ke dalam local storage digunakan untuk historynya
 
 void main() {
   appConfig.configuration(
@@ -33,11 +36,29 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
+      routes: {
+        GenerateResultScreen.routeNamed: (ctx) => GenerateResultScreen(
+              generateResult: ModalRoute.of(ctx).settings.arguments,
+            ),
+      },
     );
   }
 }
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.scheduleFrameCallback((_) {
+      context.read(settingProvider).read();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,62 +100,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     print('rebuild');
     return Scaffold(
       drawer: SafeArea(
-        child: Drawer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Flexible(
-                fit: FlexFit.tight,
-                child: UserAccountsDrawerHeader(
-                  accountName: const Text('Kelompok Generator'),
-                  accountEmail: SizedBox(),
-                  decoration: BoxDecoration(
-                    color: colorPallete.primaryColor,
-                    backgroundBlendMode: BlendMode.darken,
-                    image: DecorationImage(
-                      image: AssetImage("${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}"),
-                      alignment: Alignment.centerRight,
-                    ),
-                  ),
-                ),
-              ),
-              Flexible(
-                fit: FlexFit.tight,
-                flex: 3,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      DrawerMenu(
-                        showDivider: true,
-                        title: 'Setting Generate Kelompok',
-                        trailing: CircleAvatar(
-                          child: FittedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('100'),
-                            ),
-                          ),
-                          backgroundColor: colorPallete.accentColor,
-                          foregroundColor: colorPallete.white,
-                          radius: sizes.width(context) / 30,
-                        ),
-                        onTap: () {},
-                      ),
-                      DrawerMenu(
-                        showDivider: true,
-                        trailing: Icon(
-                          Icons.mobile_friendly,
-                        ),
-                        title: 'Tentang aplikasi',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: DrawerSide(),
       ),
       appBar: AppBar(
         centerTitle: true,
@@ -152,13 +118,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: IconButton(
               icon: Icon(Icons.wifi_protected_setup_sharp),
               onPressed: () async {
-                FunctionRequest.processGenerate(
+                await FunctionRequest.processGenerate(
                   context,
-                  onCompleteGenerate: () async {
-                    final result = await FunctionRequest.generateGroup(
-                      context,
-                      generateTotalGroup: 4,
-                    );
+                  onCompleteGenerate: () {
+                    final result = FunctionRequest.generateGroup(context);
+                    print(result);
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      Navigator.of(context).pushNamed(
+                        GenerateResultScreen.routeNamed,
+                        arguments: result,
+                      );
+                    });
                   },
                 );
               },
@@ -166,7 +136,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
         ],
       ),
-      // body: Center(child: TextFormFieldCustom(controller: null)),
       body: SizedBox.expand(
         child: Stack(
           children: [
@@ -226,6 +195,108 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       floatingActionButton: FAB(
         formKey: _formKey,
         namePersonController: namePersonController,
+      ),
+    );
+  }
+}
+
+class DrawerSide extends StatelessWidget {
+  const DrawerSide({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: UserAccountsDrawerHeader(
+              accountName: const Text('Kelompok Generator'),
+              accountEmail: SizedBox(),
+              decoration: BoxDecoration(
+                color: colorPallete.primaryColor,
+                backgroundBlendMode: BlendMode.darken,
+                image: DecorationImage(
+                  image: AssetImage("${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}"),
+                  alignment: Alignment.centerRight,
+                ),
+              ),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            flex: 3,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DrawerMenu(
+                    showDivider: true,
+                    title: 'Setting Generate Kelompok',
+                    trailing: CircleAvatar(
+                      child: FittedBox(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Consumer(builder: (context, watch, child) {
+                            final settingTotal = watch(settingProvider.state).totalGenerateGroup;
+                            return Text('$settingTotal');
+                          }),
+                        ),
+                      ),
+                      backgroundColor: colorPallete.accentColor,
+                      foregroundColor: colorPallete.white,
+                      radius: sizes.width(context) / 30,
+                    ),
+                    onTap: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(
+                            'Total kelompok',
+                            style: appTheme.headline6(context),
+                          ),
+                          content: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormFieldCustom(
+                              controller: null,
+                              prefixIcon: null,
+                              keyboardType: TextInputType.number,
+                              inputFormatter: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onFieldSubmitted: (value) => context.read(settingProvider).save(
+                                int.tryParse(value),
+                                generateTotal: (total) async {
+                                  Navigator.of(context).pop();
+                                  await GlobalFunction.showToast(
+                                    message: 'Total kelompok disetting menjadi : $total',
+                                    toastType: ToastType.Success,
+                                    isLongDuration: true,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          actions: [],
+                        ),
+                      );
+                    },
+                  ),
+                  DrawerMenu(
+                    showDivider: true,
+                    trailing: Icon(
+                      Icons.mobile_friendly,
+                    ),
+                    title: 'Tentang aplikasi',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -356,9 +427,96 @@ class ListPerson extends StatelessWidget {
   }
 }
 
-class GenerateGroupScreen extends StatelessWidget {
+class GenerateResultScreen extends StatelessWidget {
+  static const routeNamed = '/generate-result-screen';
+  final Map<String, List<PersonModel>> generateResult;
+
+  GenerateResultScreen({@required this.generateResult});
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text('Preview kelompok'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf),
+            onPressed: () {
+              FunctionRequest.printPDF(generateResult);
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ...generateResult
+                  .map(
+                    (nameGroup, persons) => MapEntry(
+                      nameGroup,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            nameGroup,
+                            style: appTheme.headline4(context),
+                          ),
+                          SizedBox(height: 10),
+                          Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            child: ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: persons.length,
+                              itemBuilder: (context, index) {
+                                final person = persons[index];
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundColor: colorPallete.accentColor,
+                                        foregroundColor: colorPallete.white,
+                                        child: Text('${index + 1}'),
+                                      ),
+                                      title: Text(person.name),
+                                    ),
+                                    if ((index + 1 < persons.length)) Divider(thickness: 1),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  )
+                  .values
+                  .toList()
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
+
+// child: Column(
+//   children: [
+//     SizedBox(height: 10),
+//     ...generateResult
+//         .map(
+//           (nameGroup, persons) => MapEntry(
+//             nameGroup,
+//             Row(children: [Text('11')]),
+//           ),
+//         )
+//         .values
+//         .toList(),
+//     SizedBox(height: 10),
+
+//   ],
+// ),
