@@ -1,1 +1,1 @@
-export './person/person.dart';
+export 'person/person_api.dart';
