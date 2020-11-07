@@ -20,7 +20,7 @@ class SettingProvider extends StateNotifier<SettingModel> {
 
   Future<void> read() async {
     final pref = await SharedPreferences.getInstance();
-    final result = pref.getInt(_totalGenerateGroupKey) ?? 0;
+    final result = pref.getInt(_totalGenerateGroupKey) ?? 1;
     state = state.copyWith(totalGenerateGroup: result);
     print(result);
   }
