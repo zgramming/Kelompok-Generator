@@ -1,20 +1,23 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_template/functions/global_function.dart';
+import 'package:global_template/global_template.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share/share.dart';
 
-import 'package:kelompok_generator/main.dart';
-
 import '../../network/models/models.dart';
 import '../../providers/providers.dart';
+import '../../screens/welcome/widgets/list_person.dart';
+import './pdf_layout/pdf_layout.dart';
 
 class FunctionRequest {
+  static const nameApplication = 'kelompok-generator';
   static Future<void> addPerson(
     BuildContext context, {
     @required GlobalKey<FormState> formKey,
@@ -26,47 +29,43 @@ class FunctionRequest {
     if (!form) {
       return;
     }
+    final persons = context.read(personProvider.state);
+    final index = persons.length > 0 ? persons.length : 0;
     context.read(personProvider).add(nameController.text);
+
     if (animatedListKey.currentState != null) {
-      animatedListKey.currentState.insertItem(0, duration: Duration(seconds: 1));
+      animatedListKey.currentState.insertItem(
+        index,
+        duration: Duration(seconds: 1),
+      );
     }
     nameController.clear();
   }
 
   static Future<void> deletePerson(
     BuildContext context, {
-    @required PersonModel person,
     @required GlobalKey<AnimatedListState> animatedListKey,
     @required int index,
   }) async {
     final persons = context.read(personProvider.state);
-    context.read(personProvider).delete(person);
-
-    if (animatedListKey.currentState != null) {
-      animatedListKey.currentState.removeItem(
-        index,
-        (ctx, animation) => ListPerson(
-          /// For ordering number, [real index =0 || new index = index + 1]
-          newIndex: index + 1,
-
-          /// Person
-          person: person,
-
-          /// For logic end item dont have divider
-          persons: persons,
-
-          /// Animation
-          animation: animation,
-        ),
-        duration: Duration(seconds: 1),
+    final removedItem = persons.removeAt(index);
+    AnimatedListRemovedItemBuilder builder = (ctx, animation) {
+      return ListPerson(
+        animation: animation,
+        newIndex: index + 1,
+        person: removedItem,
       );
-    }
+    };
+
+    context.read(personProvider).delete(removedItem);
+    animatedListKey.currentState.removeItem(index, builder);
   }
 
   static Map<String, List<PersonModel>> generateGroup(BuildContext context) {
     final persons = context.read(personProvider.state);
     final generateTotalGroup = context.read(settingProvider.state).totalGenerateGroup;
-    var tempMap = <String, List<PersonModel>>{};
+
+    final tempMap = <String, List<PersonModel>>{};
     var tempPersonList = <PersonModel>[];
 
     final totalPerson = persons.length;
@@ -85,7 +84,10 @@ class FunctionRequest {
 
       var nameGroup = "Group $i";
       var selectedPerson = persons
-          .getRange(tempPersonList.length, tempPersonList.length + totalPickedPerson)
+          .getRange(
+            tempPersonList.length,
+            tempPersonList.length + totalPickedPerson,
+          )
           .toList();
 
       tempMap[nameGroup] = selectedPerson;
@@ -103,11 +105,15 @@ class FunctionRequest {
     VoidCallback onCompleteGenerate,
   }) async {
     final persons = context.read(personProvider.state);
+    final settingTotalGenerateGroup = context.read(settingProvider.state);
+
     if (persons.isEmpty) {
-      await GlobalFunction.showToast(
-          message: 'Anggota tidak boleh kosong', toastType: ToastType.Error);
-      return null;
+      throw 'Anggota tidak boleh kosong';
     }
+    if (settingTotalGenerateGroup.totalGenerateGroup > persons.length) {
+      throw 'Settingan total kelompok lebih dari total anggota';
+    }
+
     context.read(globalLoading).state = true;
     final next5Second = DateTime.now().add(const Duration(seconds: 5));
     Timer.periodic(Duration(milliseconds: 100), (timer) {
@@ -122,95 +128,197 @@ class FunctionRequest {
     });
   }
 
-  ///! Note [Maximum baris = 20, Jika lebih dari sini akan error]
-  static Future<void> printPDF(Map<String, List<PersonModel>> generateResult) async {
+  static Future<void> printPDF(
+    BuildContext context, {
+    @required Map<String, List<PersonModel>> generateResult,
+  }) async {
     print(generateResult);
-    var myTheme = pw.ThemeData.withFont(
-      base: pw.Font.ttf(await rootBundle.load("assets/fonts/body/Poppins-Medium.ttf")),
-      bold: pw.Font.ttf(await rootBundle.load("assets/fonts/body/Poppins-Regular.ttf")),
-    );
+    final now = DateTime.now();
+    try {
+      var myTheme = pw.ThemeData.withFont(
+        base: pw.Font.ttf(await rootBundle.load("assets/fonts/body/Poppins-Medium.ttf")),
+        bold: pw.Font.ttf(await rootBundle.load("assets/fonts/body/Poppins-Regular.ttf")),
+      );
 
-    final pw.Document _pdf = pw.Document(theme: myTheme);
+      final pw.Document _pdf = pw.Document(theme: myTheme);
 
-    _pdf.addPage(
-      pw.MultiPage(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        build: (ctx) => <pw.Widget>[
-          ...generateResult.entries.map((e) {
+      final logo = PdfImage.file(
+        _pdf.document,
+        bytes: (await rootBundle.load(
+          "${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}",
+        ))
+            .buffer
+            .asUint8List(),
+      );
+
+      _pdf.addPage(
+        pw.MultiPage(
+          header: (context) => PDFHeader(logo: logo),
+          footer: (context) => PDFFooter(),
+          build: (ctx) => generateResult.entries.map((e) {
             final nameGroup = e.key;
             final persons = e.value;
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+            return pw.Wrap(
               children: [
-                pw.Text(
-                  nameGroup,
-                  style: pw.TextStyle(fontSize: 20.0),
+                pw.Header(
+                  child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+                    pw.Text(nameGroup, style: pw.Theme.of(ctx).header0),
+                    pw.Text('Total anggota : ${persons.length}'),
+                  ]),
                 ),
-                pw.SizedBox(height: 10),
-                pw.Container(
-                  decoration: pw.BoxDecoration(
-                    borderRadius: 15,
-                    border: pw.BoxBorder(),
-                  ),
-                  child: persons.length > 15
-                      ? pw.GridView(
-                          crossAxisCount: 5,
-                          children: persons
-                              .map((e) => pw.Text(e.name, textAlign: pw.TextAlign.center))
-                              .toList(),
-                          padding: pw.EdgeInsets.all(20),
-                          childAspectRatio: .5,
-                        )
-                      : pw.ListView.builder(
-                          itemCount: persons.length,
-                          itemBuilder: (context, index) {
-                            final person = persons[index];
-                            return pw.Padding(
-                              padding: const pw.EdgeInsets.symmetric(horizontal: 12.0),
-                              child: pw.Column(
-                                children: [
-                                  pw.Row(
-                                    children: [
-                                      pw.Flexible(child: pw.Text('${index + 1}.')),
-                                      pw.Flexible(
-                                        fit: pw.FlexFit.tight,
-                                        child: pw.Padding(
-                                          padding: pw.EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: pw.Text(person.name, maxLines: 1),
-                                        ),
-                                      ),
-                                    ],
+                for (int i = 0; i < persons.length; i++)
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Row(
+                        children: [
+                          pw.Container(
+                            width: 20,
+                            height: 20,
+                            margin: const pw.EdgeInsets.all(4.0),
+                            decoration: pw.BoxDecoration(
+                              shape: pw.BoxShape.circle,
+                              color: PdfColor.fromInt(0xFFAE355B),
+                            ),
+                            child: pw.FittedBox(
+                              child: pw.Padding(
+                                padding: const pw.EdgeInsets.all(8.0),
+                                child: pw.Text(
+                                  '${i + 1}',
+                                  style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: PdfColor.fromInt(0xFFFFFFFF),
                                   ),
-                                  pw.SizedBox(height: 10),
-                                  if ((index + 1) < persons.length) pw.Divider(thickness: 1),
-                                ],
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                ),
-                pw.SizedBox(height: 20),
+                            ),
+                          ),
+                          pw.Text('${persons[i].name}')
+                        ],
+                      ),
+                      pw.Divider(thickness: .25),
+                    ],
+                  )
               ],
             );
           }).toList(),
+        ),
+      );
+      final output = await getTemporaryDirectory();
+      final file = File("${output.path}/$nameApplication-${now.microsecondsSinceEpoch}.pdf");
+      await file.writeAsBytes(_pdf.save());
+      print(file.path);
+      await Share.shareFiles(
+        [
+          file.path,
         ],
-        footer: (context) {
-          return pw.Text(
-              '${GlobalFunction.formatYearMonthDay(DateTime.now())} | ${GlobalFunction.formatHoursMinutesSeconds(DateTime.now())}');
+        text: 'PDF generate kelompok',
+        subject: '''
+
+                Tanggal pembuatan : 
+                ${GlobalFunction.formatYearMonthDaySpecific(now)} 
+                ${GlobalFunction.formatHoursMinutesSeconds(now)}
+              
+                ''',
+      ).whenComplete(
+        () async {
+          print('start save history');
+
+          /// Encoded list person
+          final persons = context.read(personProvider.state);
+          final encodedPersons = json.encode(persons);
+
+          /// Convert File PDF to base64
+          final bytesPDF = await file.readAsBytes();
+          final base64PDF = base64Encode(bytesPDF);
+
+          final history = HiveHistoryModel()
+            ..base64PDF = base64PDF
+            ..encodedPersons = encodedPersons
+            ..createdAt = now;
+
+          await context.read(historyProvider).add(history);
+          print('end save history');
         },
-      ),
-    );
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/kelompok-generator.pdf");
-    await file.writeAsBytes(_pdf.save());
-    print(file.path);
-    await Share.shareFiles(
-      [
-        file.path,
-      ],
-      text: 'PDF generate kelompok',
-      subject: 'Gunakan PDF ini sebaik mungkin ya...',
-    );
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  static Future<void> printHistoryPDF(HiveHistoryModel history) async {
+    try {
+      final tempFolder = await getTemporaryDirectory();
+      final now = DateTime.now();
+
+      final base64ToUint8List = base64Decode(history.base64PDF);
+
+      final filePDF = await File(
+              '${tempFolder.path}/kelompok-generator-${history.createdAt.microsecondsSinceEpoch}.pdf')
+          .create();
+      await filePDF.writeAsBytes(base64ToUint8List);
+      print(filePDF.path);
+      await Share.shareFiles(
+        [
+          filePDF.path,
+        ],
+        text: 'PDF generate kelompok',
+        subject: '''
+                Tanggal pembuatan : 
+                ${GlobalFunction.formatYearMonthDaySpecific(now)} 
+                ${GlobalFunction.formatHoursMinutesSeconds(now)}
+              ''',
+      );
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  static Future<String> previewPDF(HiveHistoryModel history) async {
+    try {
+      final tempFolder = await getTemporaryDirectory();
+      final path =
+          '${tempFolder.path}/kelompok-generator-${history.createdAt.microsecondsSinceEpoch}.pdf';
+      final pdfExists = await File(path).exists();
+
+      if (!pdfExists) {
+        print('masuk sini ga? ');
+        final base64ToUint8List = base64Decode(history.base64PDF);
+        final filePDF = await File(path).create();
+        await filePDF.writeAsBytes(base64ToUint8List);
+      }
+
+      return path;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  static void reGenerate(
+    BuildContext context, {
+    @required HiveHistoryModel history,
+    @required VoidCallback onCompeleted,
+  }) {
+    /// Get current list person
+    final persons = context.read(personProvider.state);
+
+    /// decoded list person
+    final List decodedPersons = json.decode(history.encodedPersons);
+
+    /// mapping result decoded list person
+    final result = decodedPersons.map((e) => PersonModel.fromJson(e)).toList();
+
+    context.read(personProvider).reGenerate(result);
+
+    final animatedListKey = context.read(globalAnimatedListKey).state;
+
+    for (var i = 0; i < result.length; i++) {
+      final indexPerson = persons.length > 0 ? persons.length : 0;
+      if (animatedListKey.currentState != null) {
+        animatedListKey.currentState.insertItem(indexPerson);
+      }
+    }
+    onCompeleted();
   }
 }
 
