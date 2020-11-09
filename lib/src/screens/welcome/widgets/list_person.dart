@@ -23,7 +23,7 @@ class ListPerson extends StatelessWidget {
       children: [
         SlideTransition(
           position: animation.drive(
-            Tween(begin: Offset(1.0, 0.0), end: Offset.zero),
+            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero),
           ),
           child: ListTile(
             leading: CircleAvatar(
