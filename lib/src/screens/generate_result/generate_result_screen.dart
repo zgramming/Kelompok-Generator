@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_template/global_template.dart';
+import 'package:kelompok_generator/src/providers/global/global_provider.dart';
 
 import '../../network/models/models.dart';
 
@@ -16,39 +18,57 @@ class GenerateResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Preview kelompok'),
+        title: Text('Preview Grup'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ...generateResult
-                  .map(
-                    (nameGroup, persons) {
-                      return MapEntry(
-                        nameGroup,
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              nameGroup,
-                              style: appTheme.headline4(context),
-                            ),
-                            SizedBox(height: 10),
-                            GenerateListGroup(persons: persons),
-                            SizedBox(height: 20),
-                          ],
-                        ),
-                      );
-                    },
-                  )
-                  .values
-                  .toList()
-            ],
+      body: Column(
+        children: [
+          SizedBox(height: 10),
+          Consumer(
+            builder: (context, watch, child) {
+              final nameGroup = watch(globalNameGroup).state;
+              return Text(
+                nameGroup,
+                style: appTheme.headline5(context).copyWith(
+                      fontFamily: appConfig.headerFont,
+                      fontWeight: FontWeight.w600,
+                    ),
+              );
+            },
           ),
-        ),
+          SizedBox(height: 10),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: generateResult
+                      .map(
+                        (group, persons) {
+                          return MapEntry(
+                            group,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  group,
+                                  style: appTheme.headline6(context),
+                                ),
+                                SizedBox(height: 10),
+                                GenerateListGroup(persons: persons),
+                                SizedBox(height: 20),
+                              ],
+                            ),
+                          );
+                        },
+                      )
+                      .values
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: GenerateFAB(generateResult: generateResult),
     );
