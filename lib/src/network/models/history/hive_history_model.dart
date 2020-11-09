@@ -9,14 +9,17 @@ class HiveHistoryModel extends HiveObject {
   @HiveField(0)
   String id;
   @HiveField(1)
-  String encodedPersons;
+  String nameGroup;
   @HiveField(2)
-  String base64PDF;
+  String encodedPersons;
   @HiveField(3)
+  String base64PDF;
+  @HiveField(4)
   DateTime createdAt;
 
   HiveHistoryModel({
     this.id,
+    this.nameGroup,
     this.encodedPersons,
     this.base64PDF,
     this.createdAt,
@@ -24,12 +27,14 @@ class HiveHistoryModel extends HiveObject {
 
   HiveHistoryModel copyWith({
     String id,
+    String nameGroup,
     String encodedPersons,
     String base64PDF,
     DateTime createdAt,
   }) {
     return HiveHistoryModel(
       id: id ?? this.id,
+      nameGroup: nameGroup ?? this.nameGroup,
       encodedPersons: encodedPersons ?? this.encodedPersons,
       base64PDF: base64PDF ?? this.base64PDF,
       createdAt: createdAt ?? this.createdAt,
