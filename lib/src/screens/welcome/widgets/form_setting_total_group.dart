@@ -26,12 +26,12 @@ class FormSettingTotalGroup extends StatelessWidget {
             inputFormatter: [
               FilteringTextInputFormatter.digitsOnly,
             ],
-            onFieldSubmitted: (value) {
+            onFieldSubmitted: (value) async {
               final form = _formKey.currentState.validate();
               if (!form) {
                 return;
               }
-              context.read(settingProvider).save(
+              await context.read(settingProvider).save(
                 int.tryParse(value),
                 generateTotal: (total) async {
                   Navigator.of(context).pop();
