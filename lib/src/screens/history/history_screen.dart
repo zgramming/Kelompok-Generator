@@ -26,7 +26,10 @@ class HistoryScreen extends StatelessWidget {
               child: Text('Riwayat masih kosong'),
             );
           }
-          final histories = box.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          final histories = box.values.toList()
+            ..sort(
+              (a, b) => b.createdAt.compareTo(a.createdAt),
+            );
           return GroupedListView<HiveHistoryModel, DateTime>(
             elements: histories,
             groupBy: (element) {
