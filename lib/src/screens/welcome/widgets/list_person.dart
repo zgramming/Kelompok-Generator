@@ -43,6 +43,9 @@ class ListPerson extends StatelessWidget {
                               backgroundColor: colorPallete.red,
                               icon: Icons.delete,
                               foregroundColor: colorPallete.white,
+                              radius: sizes.isMobileLayout(context)
+                                  ? sizes.width(context) * .045
+                                  : sizes.width(context) * .025,
                               onTap: () => FunctionRequest.deletePerson(
                                 context,
                                 animatedListKey: keyAnimatedList,
