@@ -18,23 +18,26 @@ class HiveHistoryModelAdapter extends TypeAdapter<HiveHistoryModel> {
     };
     return HiveHistoryModel(
       id: fields[0] as String,
-      encodedPersons: fields[1] as String,
-      base64PDF: fields[2] as String,
-      createdAt: fields[3] as DateTime,
+      nameGroup: fields[1] as String,
+      encodedPersons: fields[2] as String,
+      base64PDF: fields[3] as String,
+      createdAt: fields[4] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveHistoryModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.encodedPersons)
+      ..write(obj.nameGroup)
       ..writeByte(2)
-      ..write(obj.base64PDF)
+      ..write(obj.encodedPersons)
       ..writeByte(3)
+      ..write(obj.base64PDF)
+      ..writeByte(4)
       ..write(obj.createdAt);
   }
 
