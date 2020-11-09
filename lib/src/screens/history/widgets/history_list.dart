@@ -7,9 +7,14 @@ import '../../../functions/functions.dart';
 import '../../../network/models/models.dart';
 
 class HistoryList extends StatelessWidget {
+  const HistoryList({
+    @required this.index,
+    @required this.history,
+  });
+
   final int index;
   final HiveHistoryModel history;
-  HistoryList({@required this.index, @required this.history});
+
   @override
   Widget build(BuildContext context) {
     print('ismobiledesign ${sizes.isMobileLayout(context)}');
@@ -22,7 +27,7 @@ class HistoryList extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.all(12.0),
+        contentPadding: const EdgeInsets.all(20.0),
         leading: CircleAvatar(
           backgroundColor: colorPallete.accentColor,
           child: FittedBox(
@@ -39,7 +44,7 @@ class HistoryList extends StatelessWidget {
           ),
         ),
         title: Text(
-          'ID : ${history.id}',
+          history.nameGroup,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -68,13 +73,12 @@ class HistoryList extends StatelessWidget {
         ),
         trailing: Container(
           height: double.infinity,
-          // color: Colors.red,
           child: Wrap(
             runAlignment: WrapAlignment.center,
             children: [
               ActionCircleButton(
                 radius: sizes.isMobileLayout(context)
-                    ? sizes.width(context) * .04
+                    ? sizes.width(context) * .035
                     : sizes.width(context) * .0175,
                 backgroundColor: colorPallete.white,
                 foregroundColor: colorPallete.accentColor,
@@ -97,23 +101,24 @@ class HistoryList extends StatelessWidget {
               ),
               SizedBox(width: sizes.width(context) / 40),
               ActionCircleButton(
-                  radius: sizes.isMobileLayout(context)
-                      ? sizes.width(context) * .04
-                      : sizes.width(context) * .0175,
-                  icon: Icons.picture_as_pdf,
-                  backgroundColor: colorPallete.red,
-                  foregroundColor: colorPallete.white,
-                  onTap: () async {
-                    try {
-                      await FunctionRequest.printHistoryPDF(history);
-                    } catch (e) {
-                      await GlobalFunction.showToast(
-                        message: e.toString(),
-                        isLongDuration: true,
-                        toastType: ToastType.Error,
-                      );
-                    }
-                  }),
+                radius: sizes.isMobileLayout(context)
+                    ? sizes.width(context) * .035
+                    : sizes.width(context) * .0175,
+                icon: Icons.picture_as_pdf,
+                backgroundColor: colorPallete.red,
+                foregroundColor: colorPallete.white,
+                onTap: () async {
+                  try {
+                    await FunctionRequest.printHistoryPDF(history);
+                  } catch (e) {
+                    await GlobalFunction.showToast(
+                      message: e.toString(),
+                      isLongDuration: true,
+                      toastType: ToastType.Error,
+                    );
+                  }
+                },
+              ),
               SizedBox(width: sizes.width(context) / 40),
             ],
           ),
