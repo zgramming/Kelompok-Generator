@@ -18,6 +18,7 @@ import './pdf_layout/pdf_layout.dart';
 
 class FunctionRequest {
   static const nameApplication = 'kelompok-generator';
+
   static Future<void> addPerson(
     BuildContext context, {
     @required GlobalKey<FormState> formKey,
@@ -84,10 +85,7 @@ class FunctionRequest {
 
       var nameGroup = "Group $i";
       var selectedPerson = persons
-          .getRange(
-            tempPersonList.length,
-            tempPersonList.length + totalPickedPerson,
-          )
+          .getRange(tempPersonList.length, tempPersonList.length + totalPickedPerson)
           .toList();
 
       tempMap[nameGroup] = selectedPerson;
@@ -224,6 +222,9 @@ class FunctionRequest {
         () async {
           print('start save history');
 
+          /// Get global name group
+          final nameGroup = context.read(globalNameGroup).state;
+
           /// Encoded list person
           final persons = context.read(personProvider.state);
           final encodedPersons = json.encode(persons);
@@ -233,6 +234,7 @@ class FunctionRequest {
           final base64PDF = base64Encode(bytesPDF);
 
           final history = HiveHistoryModel()
+            ..nameGroup = nameGroup
             ..base64PDF = base64PDF
             ..encodedPersons = encodedPersons
             ..createdAt = now;
