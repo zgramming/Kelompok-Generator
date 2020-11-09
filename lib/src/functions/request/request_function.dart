@@ -149,18 +149,20 @@ class FunctionRequest {
             .asUint8List(),
       );
 
+      final nameGroup= context.read(globalNameGroup).state;
+
       _pdf.addPage(
         pw.MultiPage(
-          header: (context) => PDFHeader(logo: logo),
+          header: (context) => PDFHeader(logo: logo,nameGroup:nameGroup),
           footer: (context) => PDFFooter(),
           build: (ctx) => generateResult.entries.map((e) {
-            final nameGroup = e.key;
+            final group = e.key;
             final persons = e.value;
             return pw.Wrap(
               children: [
                 pw.Header(
                   child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-                    pw.Text(nameGroup, style: pw.Theme.of(ctx).header0),
+                    pw.Text(group, style: pw.Theme.of(ctx).header0),
                     pw.Text('Total anggota : ${persons.length}'),
                   ]),
                 ),

@@ -3,7 +3,11 @@ import 'package:pdf/widgets.dart' as pw;
 
 class PDFHeader extends pw.StatelessWidget {
   final PdfImage logo;
-  PDFHeader({this.logo});
+  final String nameGroup;
+  PDFHeader({
+    this.nameGroup,
+    this.logo,
+  });
   @override
   pw.Widget build(pw.Context context) {
     print(context.pageNumber);
@@ -12,7 +16,7 @@ class PDFHeader extends pw.StatelessWidget {
       children: [
         if (context.pageNumber == 1)
           pw.Text(
-            'Kelompok generator',
+            nameGroup,
             style: pw.Theme.of(context).header1,
           )
         else
