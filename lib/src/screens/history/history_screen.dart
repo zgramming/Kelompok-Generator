@@ -40,12 +40,15 @@ class HistoryScreen extends StatelessWidget {
               padding: const EdgeInsets.all(12.0),
               child: Text(
                 '${GlobalFunction.formatYearMonthDaySpecific(date)}',
-                style: appTheme.headline6(context).copyWith(fontFamily: appConfig.headerFont),
+                style: appTheme.headline6(context).copyWith(
+                      fontFamily: appConfig.headerFont,
+                    ),
               ),
             ),
-            indexedItemBuilder: (context, history, index) {
-              return HistoryList(index: index, history: history);
-            },
+            indexedItemBuilder: (context, history, index) => HistoryList(
+              index: index,
+              history: history,
+            ),
           );
         },
       ),
