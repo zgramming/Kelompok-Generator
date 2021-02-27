@@ -37,7 +37,7 @@ class FormSettingTotalGroup extends StatelessWidget {
                   Navigator.of(context).pop();
                   await GlobalFunction.showToast(
                     message: 'Total kelompok menjadi : $total',
-                    toastType: ToastType.Success,
+                    toastType: ToastType.success,
                     isLongDuration: true,
                   );
                 },
