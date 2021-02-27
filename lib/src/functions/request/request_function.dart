@@ -140,15 +140,19 @@ class FunctionRequest {
 
       final pw.Document _pdf = pw.Document(theme: myTheme);
 
-      final logo = PdfImage.file(
-        _pdf.document,
-        bytes: (await rootBundle.load(
-          "${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}",
-        ))
+      // final logo = PdfImage.file(
+      //   _pdf.document,
+      //   bytes: (await rootBundle.load(
+      //     "${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}",
+      //   ))
+      //       .buffer
+      //       .asUint8List(),
+      // );
+      final logo = pw.MemoryImage(
+        (await rootBundle.load('${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}'))
             .buffer
             .asUint8List(),
       );
-
       final nameGroup = context.read(globalNameGroup).state;
 
       _pdf.addPage(
@@ -206,7 +210,7 @@ class FunctionRequest {
       );
       final output = await getTemporaryDirectory();
       final file = File("${output.path}/$nameApplication-${now.microsecondsSinceEpoch}.pdf");
-      await file.writeAsBytes(_pdf.save());
+      await file.writeAsBytes(await _pdf.save());
       print(file.path);
       await Share.shareFiles(
         [

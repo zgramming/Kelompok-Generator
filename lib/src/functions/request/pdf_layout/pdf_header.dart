@@ -1,8 +1,7 @@
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 class PDFHeader extends pw.StatelessWidget {
-  final PdfImage logo;
+  final pw.MemoryImage logo;
   final String nameGroup;
   PDFHeader({
     this.nameGroup,
