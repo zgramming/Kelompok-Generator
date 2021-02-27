@@ -1,41 +1,26 @@
-class SettingModel {
-  final int totalGenerateGroup;
-  SettingModel({
+import 'package:equatable/equatable.dart';
+
+class SettingModel extends Equatable {
+  const SettingModel({
     this.totalGenerateGroup,
+    this.isAlreadyOnboardingScreen,
   });
+
+  final int totalGenerateGroup;
+  final bool isAlreadyOnboardingScreen;
+
+  @override
+  List<Object> get props => [totalGenerateGroup, isAlreadyOnboardingScreen];
+
+  @override
+  bool get stringify => true;
 
   SettingModel copyWith({
     int totalGenerateGroup,
-  }) {
-    return SettingModel(
-      totalGenerateGroup: totalGenerateGroup ?? this.totalGenerateGroup,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'totalGenerateGroup': totalGenerateGroup,
-    };
-  }
-
-  factory SettingModel.fromJson(Map<String, dynamic> json) {
-    if (json == null) return null;
-
-    return SettingModel(
-      totalGenerateGroup: json['totalGenerateGroup'],
-    );
-  }
-
-  @override
-  String toString() => 'SettingModel(totalGenerateGroup: $totalGenerateGroup)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is SettingModel && o.totalGenerateGroup == totalGenerateGroup;
-  }
-
-  @override
-  int get hashCode => totalGenerateGroup.hashCode;
+    bool isAlreadyOnboardingScreen,
+  }) =>
+      SettingModel(
+        totalGenerateGroup: totalGenerateGroup ?? this.totalGenerateGroup,
+        isAlreadyOnboardingScreen: isAlreadyOnboardingScreen ?? this.isAlreadyOnboardingScreen,
+      );
 }
