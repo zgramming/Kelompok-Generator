@@ -140,14 +140,6 @@ class FunctionRequest {
 
       final pw.Document _pdf = pw.Document(theme: myTheme);
 
-      // final logo = PdfImage.file(
-      //   _pdf.document,
-      //   bytes: (await rootBundle.load(
-      //     "${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}",
-      //   ))
-      //       .buffer
-      //       .asUint8List(),
-      // );
       final logo = pw.MemoryImage(
         (await rootBundle.load('${appConfig.urlImageAsset}/${appConfig.urlLogoAsset}'))
             .buffer
