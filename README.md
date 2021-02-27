@@ -6,7 +6,7 @@
 
 <p align="center">
    <img src="https://github.com/zgramming/Kelompok-Generator/blob/main/gif/tablet/1.gif" alt="Databay showcase gif" title="Databay showcase gif" width="650"/>
-   <img src="https://github.com/zgramming/Kelompok-Generator/blob/main/gif/mobile/1.gif" alt="Databay showcase gif" title="Databay showcase gif" width="250"/>
+   <img src="https://github.com/zgramming/Kelompok-Generator/blob/main/gif/mobile/1.gif" alt="Databay showcase gif" title="Databay showcase gif" width="200"/>
 </p>
 
 # Kelompok Generator
