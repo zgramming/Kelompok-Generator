@@ -1,28 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 import '../../network/models/models.dart';
 
-const _totalGenerateGroupKey = 'totalGenerateGroupKey';
-
 class SettingProvider extends StateNotifier<SettingModel> {
-  SettingProvider([SettingModel state]) : super(state ?? SettingModel());
+  final String keyBox = 'boxSettingProvider';
+  final String _totalGenerateGroupKey = 'totalGenerateGroupKey';
+  final String _isAlreadyOnboardingScreenKey = 'isAlreadyOnboardingScreenKey';
 
-  Future<bool> save(
+  SettingProvider([SettingModel state])
+      : super(
+          SettingModel(
+            isAlreadyOnboardingScreen: false,
+            totalGenerateGroup: 1,
+          ),
+        );
+
+  /// Save setting sharedPreferences Total Group
+  Future<void> saveSettingTotalGroup(
     int total, {
     Function(int total) generateTotal,
   }) async {
-    final pref = await SharedPreferences.getInstance();
-    final result = await pref.setInt(_totalGenerateGroupKey, total);
+    final box = Hive.box(keyBox);
+    box.put(_totalGenerateGroupKey, total);
     generateTotal(total);
     state = state.copyWith(totalGenerateGroup: total);
-    return result;
   }
 
-  Future<void> read() async {
-    final pref = await SharedPreferences.getInstance();
-    final result = pref.getInt(_totalGenerateGroupKey) ?? 1;
-    state = state.copyWith(totalGenerateGroup: result);
-    print(result);
+  /// Save setting to flag user already success Onboardingscreen
+  Future<void> saveSettingOnboardingScreen(bool value) async {
+    final box = Hive.box(keyBox);
+
+    box.put(_isAlreadyOnboardingScreenKey, value);
+    state = state.copyWith(isAlreadyOnboardingScreen: value);
+  }
+
+  Future<void> readSettingProvider() async {
+    var box = await Hive.openBox(keyBox);
+    final bool sessionOnboarding = box.get(_isAlreadyOnboardingScreenKey, defaultValue: false);
+    final int sessionTotalGroup = box.get(_totalGenerateGroupKey, defaultValue: 1);
+    state = state.copyWith(
+      isAlreadyOnboardingScreen: sessionOnboarding,
+      totalGenerateGroup: sessionTotalGroup,
+    );
   }
 }
 
