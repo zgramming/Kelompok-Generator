@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_template/global_template.dart';
@@ -12,6 +14,7 @@ import './widgets/text_form_name.dart';
 import './widgets/generate_icon.dart';
 
 class WelcomeScreen extends StatefulWidget {
+  static const routeNamed = '/welcome-screen';
   @override
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
@@ -25,8 +28,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+    Timer.run(() {
       _animatedListKey = GlobalKey<AnimatedListState>();
+
       context.read(globalContext).state = context;
       context.read(globalAnimatedListKey).state = _animatedListKey;
     });
