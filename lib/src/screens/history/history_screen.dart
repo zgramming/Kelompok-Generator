@@ -42,7 +42,7 @@ class HistoryScreen extends StatelessWidget {
             groupSeparatorBuilder: (date) => Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
-                '${GlobalFunction.formatYearMonthDaySpecific(date)}',
+                '${GlobalFunction.formatYMDS(date)}',
                 style: appTheme.headline6(context).copyWith(
                       fontFamily: appConfig.headerFont,
                     ),

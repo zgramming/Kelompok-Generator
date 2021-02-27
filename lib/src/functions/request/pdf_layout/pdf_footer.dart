@@ -10,10 +10,10 @@ class PDFFooter extends pw.StatelessWidget {
       children: [
         pw.RichText(
           text: pw.TextSpan(
-            text: '${GlobalFunction.formatYearMonthDay(DateTime.now())} | ',
+            text: '${GlobalFunction.formatYMD(DateTime.now())} | ',
             children: [
               pw.TextSpan(
-                text: '${GlobalFunction.formatHoursMinutesSeconds(DateTime.now())}',
+                text: '${GlobalFunction.formatHMS(DateTime.now())}',
               )
             ],
           ),

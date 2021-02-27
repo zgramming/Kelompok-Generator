@@ -53,7 +53,7 @@ class HistoryList extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(text: '${GlobalFunction.formatHoursMinutesSeconds(history.createdAt)} |'),
+                TextSpan(text: '${GlobalFunction.formatHMS(history.createdAt)} |'),
                 TextSpan(
                   text: ' Generate ulang',
                   recognizer: TapGestureRecognizer()
@@ -93,7 +93,7 @@ class HistoryList extends StatelessWidget {
                   } catch (e) {
                     await GlobalFunction.showToast(
                       message: e.toString(),
-                      toastType: ToastType.Error,
+                      toastType: ToastType.error,
                       isLongDuration: true,
                     );
                   }
@@ -114,7 +114,7 @@ class HistoryList extends StatelessWidget {
                     await GlobalFunction.showToast(
                       message: e.toString(),
                       isLongDuration: true,
-                      toastType: ToastType.Error,
+                      toastType: ToastType.error,
                     );
                   }
                 },

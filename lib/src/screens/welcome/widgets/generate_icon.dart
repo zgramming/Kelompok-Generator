@@ -38,7 +38,7 @@ class GenerateIcon extends StatelessWidget {
           } catch (e) {
             await GlobalFunction.showToast(
               message: e.toString(),
-              toastType: ToastType.Error,
+              toastType: ToastType.error,
               isLongDuration: true,
             );
           }
