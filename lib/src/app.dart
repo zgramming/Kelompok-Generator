@@ -7,6 +7,7 @@ import './screens/generate_result/generate_result_screen.dart';
 import './screens/history/history_screen.dart';
 import './screens/splash/splash_screen.dart';
 import 'screens/history/widgets/history_list.dart';
+import 'screens/welcome/welcome_screen.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       ),
       home: SplashScreen(),
       routes: {
+        WelcomeScreen.routeNamed: (ctx) => WelcomeScreen(),
         GenerateResultScreen.routeNamed: (ctx) => GenerateResultScreen(
               generateResult: ModalRoute.of(ctx).settings.arguments,
             ),
