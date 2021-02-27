@@ -149,11 +149,11 @@ class FunctionRequest {
             .asUint8List(),
       );
 
-      final nameGroup= context.read(globalNameGroup).state;
+      final nameGroup = context.read(globalNameGroup).state;
 
       _pdf.addPage(
         pw.MultiPage(
-          header: (context) => PDFHeader(logo: logo,nameGroup:nameGroup),
+          header: (context) => PDFHeader(logo: logo, nameGroup: nameGroup),
           footer: (context) => PDFFooter(),
           build: (ctx) => generateResult.entries.map((e) {
             final group = e.key;
@@ -216,8 +216,8 @@ class FunctionRequest {
         subject: '''
 
                 Tanggal pembuatan : 
-                ${GlobalFunction.formatYearMonthDaySpecific(now)} 
-                ${GlobalFunction.formatHoursMinutesSeconds(now)}
+                ${GlobalFunction.formatYMDS(now)} 
+                ${GlobalFunction.formatHMS(now)}
               
                 ''',
       ).whenComplete(
@@ -269,8 +269,8 @@ class FunctionRequest {
         text: 'PDF generate kelompok',
         subject: '''
                 Tanggal pembuatan : 
-                ${GlobalFunction.formatYearMonthDaySpecific(now)} 
-                ${GlobalFunction.formatHoursMinutesSeconds(now)}
+                ${GlobalFunction.formatYMDS(now)} 
+                ${GlobalFunction.formatHMS(now)}
               ''',
       );
     } catch (e) {

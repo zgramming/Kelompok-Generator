@@ -9,8 +9,8 @@ import 'src/network/models/models.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
-  await initializeDateFormatting();
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
   final document = await getApplicationDocumentsDirectory();
 
   Hive
