@@ -31,11 +31,11 @@ class FormSettingTotalGroup extends StatelessWidget {
               if (!form) {
                 return;
               }
-              await context.read(settingProvider).save(
+              await context.read(settingProvider).saveSettingTotalGroup(
                 int.tryParse(value),
-                generateTotal: (total) async {
+                generateTotal: (total) {
                   Navigator.of(context).pop();
-                  await GlobalFunction.showToast(
+                  GlobalFunction.showToast(
                     message: 'Total kelompok menjadi : $total',
                     toastType: ToastType.success,
                     isLongDuration: true,
