@@ -53,7 +53,7 @@ class FunctionRequest {
     AnimatedListRemovedItemBuilder builder = (ctx, animation) {
       return ListPerson(
         animation: animation,
-        newIndex: index + 1,
+        index: index + 1,
         person: removedItem,
       );
     };
@@ -126,11 +126,10 @@ class FunctionRequest {
     });
   }
 
-  static Future<void> printPDF(
-    BuildContext context, {
-    @required Map<String, List<PersonModel>> generateResult,
-  }) async {
-    print(generateResult);
+  static Future<Map<String, dynamic>> _createPDF(
+    BuildContext context,
+    Map<String, List<PersonModel>> generateResult,
+  ) async {
     final now = DateTime.now();
     try {
       var myTheme = pw.ThemeData.withFont(
@@ -200,50 +199,66 @@ class FunctionRequest {
           }).toList(),
         ),
       );
+
       final output = await getTemporaryDirectory();
       final file = File("${output.path}/$nameApplication-${now.microsecondsSinceEpoch}.pdf");
       await file.writeAsBytes(await _pdf.save());
-      print(file.path);
-      await Share.shareFiles(
-        [
-          file.path,
-        ],
-        text: 'PDF generate kelompok',
-        subject: '''
+      final result = <String, dynamic>{
+        "pathPDF": file.path,
+        "file": file,
+      };
+      return result;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  static Future<void> sharedPDF(
+    BuildContext context,
+    Map<String, List<PersonModel>> generateResult,
+  ) async {
+    context.read(globalLoading).state = true;
+    final now = DateTime.now();
+
+    final resultPDF = await _createPDF(context, generateResult);
+    await Share.shareFiles(
+      [
+        resultPDF['pathPDF'] as String,
+      ],
+      text: 'PDF generate kelompok',
+      subject: '''
 
                 Tanggal pembuatan : 
                 ${GlobalFunction.formatYMDS(now)} 
                 ${GlobalFunction.formatHMS(now)}
               
                 ''',
-      ).whenComplete(
-        () async {
-          print('start save history');
+    ).then(
+      (_) {
+        print('start save history');
 
-          /// Get global name group
-          final nameGroup = context.read(globalNameGroup).state;
+        /// Get global name group
+        final nameGroup = context.read(globalNameGroup).state;
 
-          /// Encoded list person
-          final persons = context.read(personProvider.state);
-          final encodedPersons = json.encode(persons);
+        /// Encoded list person
+        final persons = context.read(personProvider.state);
+        final encodedPersons = json.encode(persons);
 
-          /// Convert File PDF to base64
-          final bytesPDF = await file.readAsBytes();
-          final base64PDF = base64Encode(bytesPDF);
+        /// Convert File PDF to base64
+        final bytesPDF = (resultPDF['file'] as File).readAsBytesSync();
+        final base64PDF = base64Encode(bytesPDF);
 
-          final history = HiveHistoryModel()
-            ..nameGroup = nameGroup
-            ..base64PDF = base64PDF
-            ..encodedPersons = encodedPersons
-            ..createdAt = now;
+        final history = HiveHistoryModel()
+          ..nameGroup = nameGroup
+          ..base64PDF = base64PDF
+          ..encodedPersons = encodedPersons
+          ..createdAt = now;
 
-          await context.read(historyProvider).add(history);
-          print('end save history');
-        },
-      );
-    } catch (e) {
-      throw e;
-    }
+        context.read(historyProvider).add(history);
+        print('end save history');
+      },
+    );
+    context.read(globalLoading).state = false;
   }
 
   static Future<void> printHistoryPDF(HiveHistoryModel history) async {
@@ -282,7 +297,6 @@ class FunctionRequest {
       final pdfExists = await File(path).exists();
 
       if (!pdfExists) {
-        print('masuk sini ga? ');
         final base64ToUint8List = base64Decode(history.base64PDF);
         final filePDF = await File(path).create();
         await filePDF.writeAsBytes(base64ToUint8List);
