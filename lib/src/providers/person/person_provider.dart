@@ -33,3 +33,13 @@ class PersonProvider extends StateNotifier<List<PersonModel>> {
 }
 
 final personProvider = StateNotifierProvider((ref) => PersonProvider());
+
+final personById = Provider.family.autoDispose<PersonModel, int>((ref, id) {
+  final person = ref.watch(personProvider.state);
+
+  final result = person.firstWhere(
+    (element) => element.id == id,
+    orElse: () => PersonModel(),
+  );
+  return result;
+});
