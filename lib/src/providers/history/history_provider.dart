@@ -9,20 +9,20 @@ final historyBox = Hive.box<HiveHistoryModel>(historyBoxKey);
 class HistoryProvider extends StateNotifier<List<HiveHistoryModel>> {
   HistoryProvider([List<HiveHistoryModel> state]) : super(state ?? []);
 
-  Future<void> add(HiveHistoryModel history) async {
+  void add(HiveHistoryModel history) {
     final _uuid = Uuid().v1();
     final result = history.copyWith(id: _uuid);
-    await historyBox.put(result.id, result);
+    historyBox.put(result.id, result);
     state = [...state, history];
   }
 
-  void delete(String id) async {
-    await historyBox.delete(id);
+  void delete(String id) {
+    historyBox.delete(id);
     state = state.where((element) => element.id != id).toList();
   }
 
-  void update(HiveHistoryModel history) async {
-    await historyBox.put(history.id, history);
+  void update(HiveHistoryModel history) {
+    historyBox.put(history.id, history);
     state = [
       for (final item in state)
         if (item.id == history.id) history else item
