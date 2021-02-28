@@ -38,14 +38,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('rebuild');
     return Scaffold(
       drawer: SafeArea(
         child: DrawerSide(),
       ),
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Kelompok Generator'),
+        title: const Text('Kelompok Generator'),
         actions: [
           GenerateIcon(),
         ],
@@ -77,9 +76,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             Animation<double> animation,
                           ) {
                             final person = persons[index];
-                            final newIndex = index + 1;
                             return ListPerson(
-                              newIndex: newIndex,
+                              index: index,
                               person: person,
                               animation: animation,
                             );

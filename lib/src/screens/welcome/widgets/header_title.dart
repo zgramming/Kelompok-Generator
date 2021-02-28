@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_template/global_template.dart';
 
 import '../../../providers/providers.dart';
-import './form_group_name.dart';
+import 'form_update_group_name.dart';
 
 class WelcomeHeaderTitle extends StatelessWidget {
   const WelcomeHeaderTitle({
@@ -20,7 +20,7 @@ class WelcomeHeaderTitle extends StatelessWidget {
             onTap: () {
               showDialog(
                 context: context,
-                builder: (context) => FormNameGroup(),
+                builder: (context) => FormUpdateGroupName(),
               );
             },
             child: Consumer(
@@ -31,7 +31,6 @@ class WelcomeHeaderTitle extends StatelessWidget {
                   maxLines: 1,
                   style: appTheme.subtitle1(context).copyWith(
                         color: colorPallete.blue,
-                        decoration: TextDecoration.underline,
                         fontWeight: FontWeight.bold,
                       ),
                 );

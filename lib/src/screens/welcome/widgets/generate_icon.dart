@@ -13,10 +13,11 @@ class GenerateIcon extends StatelessWidget {
     return ProviderListener(
       provider: globalLoading,
       onChange: (context, loading) async {
-        if (loading.state)
-          await GlobalFunction.showDialogLoading(context);
-        else
+        if (loading.state) {
+          GlobalFunction.showLoadingDialog(context);
+        } else {
           Navigator.of(context).pop();
+        }
       },
       child: IconButton(
         icon: Icon(Icons.wifi_protected_setup_sharp),
@@ -26,7 +27,7 @@ class GenerateIcon extends StatelessWidget {
               context,
               onCompleteGenerate: () {
                 final result = FunctionRequest.generateGroup(context);
-                print(result);
+
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.of(context).pushNamed(
                     GenerateResultScreen.routeNamed,

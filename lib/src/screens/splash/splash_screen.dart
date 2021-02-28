@@ -27,13 +27,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Consumer(
         builder: (_, watch, __) {
-          // Karena namanya sama , gunakan alias
-          final setProvider = watch(settingProvider.state);
+          final setting = watch(settingProvider.state);
 
           return SplashScreenTemplate(
             navigateAfterSplashScreen: (ctx) {
               /// Check if user already pass OnboardingScreen
-              if (setProvider.isAlreadyOnboardingScreen) {
+              if (setting.isAlreadyOnboardingScreen) {
                 return WelcomeScreen();
               }
               return OnboardingScreen();
