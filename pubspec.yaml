@@ -32,7 +32,6 @@ dependencies:
   cupertino_icons: ^1.0.0
   equatable: ^1.2.6
   flutter_riverpod: ^0.12.4
-  flutter_speed_dial: ^2.1.1
   freezed_annotation: ^0.12.0
   grouped_list: ^3.7.1
   hive: ^1.4.4+1
