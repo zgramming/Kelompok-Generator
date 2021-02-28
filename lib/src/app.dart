@@ -17,7 +17,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: colorPallete.primaryColor,
         accentColor: colorPallete.accentColor,
-        scaffoldBackgroundColor: colorPallete.backgroundColor5,
         textTheme: GoogleFonts.openSansTextTheme(
           Theme.of(context).textTheme,
         ),
