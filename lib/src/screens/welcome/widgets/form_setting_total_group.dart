@@ -18,6 +18,7 @@ class FormSettingTotalGroup extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormFieldCustom(
+            autoFocus: true,
             controller: null,
             prefixIcon: null,
             keyboardType: TextInputType.number,

@@ -20,6 +20,7 @@ class FormUpdateGroupName extends StatelessWidget {
             8.0,
           ),
           child: TextFormFieldCustom(
+            autoFocus: true,
             controller: null,
             prefixIcon: null,
             hintText: 'Kelompok Ceria',

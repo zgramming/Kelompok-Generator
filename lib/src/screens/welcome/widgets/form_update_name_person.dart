@@ -13,6 +13,7 @@ class FormUpdateNamePerson extends StatelessWidget {
   }) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
+  final controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,7 @@ class FormUpdateNamePerson extends StatelessWidget {
             builder: (_, watch, __) {
               final person = watch(personById(id));
               return TextFormFieldCustom(
+                autoFocus: true,
                 controller: null,
                 prefixIcon: null,
                 initialValue: person.name,
