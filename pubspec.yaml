@@ -36,11 +36,13 @@ dependencies:
   grouped_list: ^3.7.1
   hive: ^1.4.4+1
   hive_flutter: ^0.3.1
+  launch_review: ^2.0.0
   native_pdf_view: ^3.9.1
   path_provider: ^1.6.27
   pdf: ^2.1.0
   share: ^0.6.5+4
   shared_preferences: ^0.5.8
+  url_launcher: ^5.7.10
   uuid: ^2.2.2
 
 dev_dependencies:
